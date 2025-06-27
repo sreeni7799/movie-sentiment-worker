@@ -7,7 +7,7 @@ import signal
 from rq import Queue, Worker
 from datetime import datetime
 
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 ML_SERVICE_URL = os.getenv('ML_SERVICE_URL', 'http://localhost:8000')
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
