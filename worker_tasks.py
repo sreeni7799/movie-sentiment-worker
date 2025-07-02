@@ -7,7 +7,6 @@ ML_SERVICE_URL = os.getenv('ML_SERVICE_URL', 'http://localhost:8000')
 
 def process_sentiment_batch(reviews_batch: List[Dict[str, str]]) -> Dict[str, Any]:
     job_start_time = datetime.now()
-    print(f"Worker started processing {len(reviews_batch)} reviews")
     
     try:
         if not reviews_batch:
@@ -15,7 +14,6 @@ def process_sentiment_batch(reviews_batch: List[Dict[str, str]]) -> Dict[str, An
     
         if reviews_batch:
             sample_review = reviews_batch[0]
-            print(f"Sample review: {sample_review.get('movie_name', 'Unknown')} - {sample_review.get('text', '')[:50]}...")
         
         print(f"Sending batch to ML service: {ML_SERVICE_URL}")
         

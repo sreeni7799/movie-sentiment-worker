@@ -1,7 +1,6 @@
 from pymongo import MongoClient
 import re
 import os
-import logging
 
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
 DATABASE_NAME = os.getenv('DATABASE_NAME', 'sentiment_db')
@@ -24,14 +23,14 @@ def initialize_database():
         
         existing_count = results_collection.count_documents({})
         if existing_count > 0:
-            print(f"Found {existing_count} existing records in {DATABASE_NAME}.{COLLECTION_NAME}")
+            print("records found")
         else:
-            print(f"Database is empty")
+            print(f"Database empty")
         
         return True
         
     except Exception as e:
-        print(f"Failed to connect MongoDB: {e}")
+        print(f"Failed MongoDB conn.")
         client = None
         mongo_db = None
         results_collection = None
@@ -57,21 +56,15 @@ def insert_results(batch):
             return 0
 
     if not batch:
-        print("nothing to insert")
+        print("nothing")
         return 0
 
     try:
-        # TODO: improve this later (right now clears it all)
         try:
             mongo_db[COLLECTION_NAME].delete_many({})
         except:
-            print("delete failed, skipping...")
-
+            print("delete failed")
         inserted = results_collection.insert_many(batch)
-        print("inserted:", len(inserted.inserted_ids))
-
-        # not super accurate
-        print("total now:", results_collection.count_documents({}))
         return len(inserted.inserted_ids)
 
     except:
@@ -82,17 +75,15 @@ def insert_results(batch):
 def fetch_results_from_db():
     if results_collection is None:
         if not initialize_database():
-            print("MongoDB not connected")
             return []
     
     try:
         cursor = results_collection.find({}, {"_id": 0})
         results = list(cursor)
-        print(f"Retrieved {len(results)} results from database")
         return results
         
     except Exception as e:
-        print(f"Failed to get results: {e}")
+        print("Failed to get results")
         return []
 
 def search_movies_by_sentiment(movie_name=None, sentiment=None):
@@ -121,7 +112,6 @@ def search_movies_by_sentiment(movie_name=None, sentiment=None):
         
         if search_terms:
             search_description = " AND ".join(search_terms)
-            print(f"Searched for {search_description} - Found {len(results)} results")
         else:
             print(f"Retrieved all {len(results)} results (no filters)")
         
@@ -139,8 +129,6 @@ def get_unique_movies():
     try:
         unique_movies = results_collection.distinct("movie_name")
         movies = sorted([movie for movie in unique_movies if movie and movie.strip()])
-        
-        print(f"Found {len(movies)} unique movies")
         return movies
         
     except Exception as e:
@@ -195,11 +183,9 @@ def get_sentiment_summary(movie_name=None):
         cursor = results_collection.aggregate(pipeline)
         summary = list(cursor)
         
-        print(f"Generated sentiment summary for {len(summary)} movies")
         return summary
         
     except Exception as e:
-        print(f"Failed to generate sentiment summary: {e}")
         return []
 
 def get_database_stats():
@@ -223,7 +209,7 @@ def get_database_stats():
             "negative_reviews": negative_count,
             "database_name": DATABASE_NAME,
             "collection_name": COLLECTION_NAME,
-            "mongo_uri": MONGO_URI.split('@')[-1] if '@' in MONGO_URI else MONGO_URI  # Hide credentials
+            "mongo_uri": MONGO_URI.split('@')[-1] if '@' in MONGO_URI else MONGO_URI 
         }
         
         return stats
@@ -243,8 +229,7 @@ def clear_results_collection():
         return count
         
     except Exception as e:
-        print(f"Failed to clear results: {e}")
         return 0
 
 if not initialize_database():
-    print("Database initialization failed on import")
+    print("Database failed")

@@ -2,10 +2,8 @@ import redis
 import requests
 import os
 import sys
-import time
 import signal
 from rq import Queue, Worker
-from datetime import datetime
 
 REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
@@ -27,19 +25,16 @@ class SentimentWorker:
                 db = 0
             )
             self.redis_conn.ping()
-            print(f"Connected to Redis{REDIS_HOST}:{REDIS_PORT}")
             return True
         except redis.ConnectionError as e:
-            print(f"Redis conn failed: {e}")
+            print("Redis conn failed: ")
             return False
     
     def setup_queue(self):
         try:
             self.queue = Queue('sentiment_analysis', connection=self.redis_conn)
-            print(f"Queue setup complete: {self.queue.name}")
             return True
         except Exception as e:
-            print(f"Queue setup failed: {e}")
             return False
     
     def check_dependencies(self):
@@ -50,7 +45,6 @@ class SentimentWorker:
             else:
                 print(f" MLservice responded with status {response.status_code}")
         except Exception as e:
-            print(f"MLervice check failed: {e}")
             return False
         
         try:
@@ -106,8 +100,7 @@ class SentimentWorker:
             print(f"Worker error: {e}")
             raise
         finally:
-            self.shutdown()
- # TODO: support retry later   
+            self.shutdown()  
     def shutdown(self):
         if self.running:
             print("Shutting down worker service")
